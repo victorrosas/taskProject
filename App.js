@@ -7,12 +7,12 @@ export default function App() {
   const [user, setUser] = useState(null);
 
   if(!user) {
-    return <Login />
+    return <Login changeStatus={(user) => setUser(user)}/>
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text>App Tarefas</Text>
+      <Text>Dentro da tela de Tarefas</Text>
     </SafeAreaView>
   );
 };
