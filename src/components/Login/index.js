@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, Platform } from 'react-native';
 
 export default function Login() {
+  const [type, setType] = useState('login');
+
   const [email, setEmail] = useState('');  
   const [password, setPassword] = useState('');  
 
@@ -10,7 +12,7 @@ export default function Login() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       
     <TextInput 
       placeholder='Seu email'
@@ -27,27 +29,30 @@ export default function Login() {
     />
 
     <TouchableOpacity 
-      style={styles.handleLogin}
+      style={[styles.handleLogin, {backgroundColor: type === 'login' ? '#3ea6f2' : '#141414'}]}
       onPress={handleLogin}
     >
-      <Text style={styles.loginText}>Acessar</Text>
+      <Text style={styles.loginText}>
+        { type === 'login' ? 'Acessar' : 'Cadastrar'}
+      </Text>
     </TouchableOpacity>
 
-    <TouchableOpacity>
-      <Text style={{ textAlign: 'center'}}>Criar uma conta</Text>
+    <TouchableOpacity onPress={ () => setType(type => type === 'login' ? 'cadastrar' : 'login')}>
+      <Text style={{ textAlign: 'center'}}>
+        {type === 'login' ? 'Criar uma conta' : 'Já possuo uma conta'}
+      </Text>
     </TouchableOpacity>
 
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 25,
-    backgroundColor: '#f2f6fc',
-    marginLeft: 10,
-    marginRight: 10
+    paddingTop: 35,
+    backgroundColor: '#000',
+    paddingHorizontal: 10
   },
   input: {
     marginBottom: 10,
@@ -61,7 +66,6 @@ const styles = StyleSheet.create({
   handleLogin: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#141414',
     height: 45,
     marginBottom: 10
   },
