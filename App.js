@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
    View,
     Text, 
@@ -15,11 +15,15 @@ import TaskList from './src/components/TaskList';
 
 import firebase from './src/services/firebaseConnection';
 
+import Feather from 'react-native-vector-icons/Feather'
+
 export default function App() {
   const [user, setUser] = useState(null);
   const [tasks, setTasks] = useState([]);
 
+  const inputRef = useRef(null);
   const [newTask, setNewTask] = useState('');
+  const [key, setKey] = useState('');
 
   useEffect(() => {
 
@@ -51,6 +55,25 @@ export default function App() {
       return;
     }
 
+    //Usuario quer editar uma tarefa.
+    if(key != '') {
+      firebase.database().ref('tarefas').child(user).child(key).update({
+        nome: newTask
+      })
+      .then(() => {
+        const taskIndex = tasks.findIndex((item) => item.key === key)
+        const taskClone = tasks;
+        taskClone[taskIndex].nome = newTask
+
+        setTasks([...taskClone])
+      })
+
+      Keyboard.dismiss();
+      setNewTask('');
+      setKey('');
+      return;
+    }
+
     let tarefas = firebase.database().ref('tarefas').child(user);
     let chave = tarefas.push().key;
 
@@ -71,11 +94,23 @@ export default function App() {
   }
 
   function handleDelete(key) {
-    console.log(key);
+    firebase.database().ref('tarefas').child(user).child(key).remove()
+    .then(() => {
+      const findTasks = tasks.filter( item => item.key !== key)
+      setTasks(findTasks)
+    })
   }
 
   function handleEdit(data) {
-    console.log("ITEM CLICADO", data);
+    setKey(data.key)
+    setNewTask(data.nome)
+    inputRef.current.focus();
+  }
+
+  function cancelEdit() {
+    setKey('');
+    setNewTask('');
+    Keyboard.dismiss();
   }
 
   if(!user) {
@@ -84,6 +119,17 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.container}>
+
+    {key.length > 0 && (
+      <View style={{ flexDirection: 'row', marginBottom: 8, marginLeft: 5}}>
+      <TouchableOpacity onPress={cancelEdit}>
+        <Feather name="x-circle" size={20} color="#FF0000" />
+      </TouchableOpacity>
+      <Text style={{ marginLeft: 5, color: "#FF0000"}}>
+        Você está editando uma tarefa!
+      </Text>
+    </View>
+    )}
      
     <View style={styles.containerTask}>
       <TextInput
@@ -91,6 +137,7 @@ export default function App() {
       placeholder="O que vai fazer hoje?"
       value={newTask}
       onChangeText={ (text) => setNewTask(text)}
+      ref={inputRef}
       /> 
       <TouchableOpacity style={styles.buttonAdd} onPress={handleAdd}>
         <Text style={styles.buttonText}>+</Text>
